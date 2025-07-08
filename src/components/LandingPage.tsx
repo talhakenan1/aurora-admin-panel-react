@@ -42,7 +42,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-subtle dark:from-gray-900 dark:to-gray-800 page-fade-in">
       <div className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -64,15 +64,17 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {features.map((feature, index) => (
-            <Card key={index} className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
+            <Card key={index} className={`card-modern animate-fade-in hover-glow`} style={{animationDelay: `${index * 0.1}s`}}>
+              <CardHeader className="pb-4">
                 <div className="flex items-center space-x-4">
-                  {feature.icon}
+                  <div className="p-3 rounded-xl bg-gradient-primary/10 hover-scale">
+                    {feature.icon}
+                  </div>
                   <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                <CardDescription className="text-muted-foreground text-sm leading-relaxed">
                   {feature.description}
                 </CardDescription>
               </CardContent>
