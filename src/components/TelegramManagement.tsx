@@ -111,7 +111,7 @@ const TelegramManagement: React.FC = () => {
       
       if (settingsData) {
         setNewSettings({
-          reminder_days_before: settingsData.reminder_days_before,
+          reminder_days_before: settingsData.reminder_days_before || [1, 3, 7],
           reminder_time: settingsData.reminder_time,
           email_enabled: settingsData.email_enabled,
           telegram_enabled: settingsData.telegram_enabled
