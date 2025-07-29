@@ -592,7 +592,7 @@ const TelegramManagement: React.FC = () => {
               <div>
                 <Label>Hatırlatma Günleri</Label>
                 <div className="flex gap-1 mt-1">
-                  {reminderSettings.reminder_days_before.map(day => (
+                  {(reminderSettings.reminder_days_before || []).map(day => (
                     <Badge key={day} variant="outline">{day} gün</Badge>
                   ))}
                 </div>
