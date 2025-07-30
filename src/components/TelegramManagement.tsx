@@ -312,21 +312,27 @@ const TelegramManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Telegram Yönetimi</h1>
-          <p className="text-muted-foreground">Telegram bot kullanıcılarını yönetin ve ayarları yapılandırın</p>
-        </div>
-        <div className="flex gap-2">
-          <Dialog open={isBroadcastDialogOpen} onOpenChange={setIsBroadcastDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Send className="h-4 w-4" />
-                Toplu Mesaj
-              </Button>
-            </DialogTrigger>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="bg-card rounded-xl border shadow-sm p-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Telegram Yönetimi
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Telegram bot kullanıcılarını yönetin ve ayarları yapılandırın
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Dialog open={isBroadcastDialogOpen} onOpenChange={setIsBroadcastDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="lg" className="flex items-center gap-2 hover:scale-105 transition-transform">
+                    <Send className="h-4 w-4" />
+                    Toplu Mesaj
+                  </Button>
+                </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Toplu Mesaj Gönder</DialogTitle>
@@ -359,13 +365,13 @@ const TelegramManagement: React.FC = () => {
               </div>
             </DialogContent>
           </Dialog>
-          <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Ayarlar
-              </Button>
-            </DialogTrigger>
+              <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="flex items-center gap-2 hover:scale-105 transition-transform shadow-lg">
+                    <Settings className="h-4 w-4" />
+                    Ayarlar
+                  </Button>
+                </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Hatırlatma Ayarları</DialogTitle>
@@ -434,185 +440,219 @@ const TelegramManagement: React.FC = () => {
               </div>
             </DialogContent>
           </Dialog>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Bot Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
-            Bot Bilgileri
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h3 className="font-medium">@{botUsername}</h3>
-                <p className="text-sm text-gray-500">Müşteriler bu botu kullanarak kayıt olabilir</p>
+        {/* Bot Info Card */}
+        <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-card to-card/80">
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <MessageCircle className="h-6 w-6 text-primary" />
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={copyBotLink}>
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copied ? 'Kopyalandı' : 'Linki Kopyala'}
-                </Button>
-                <Button asChild>
-                  <a href={botLink} target="_blank" rel="noopener noreferrer">
-                    Bot'u Aç
-                  </a>
-                </Button>
-              </div>
-            </div>
-            <div className="text-sm text-gray-600">
-              <p><strong>Kullanım:</strong> Müşteriler botu başlatıp <code>/register</code> komutu ile kayıt olabilir.</p>
-              <p><strong>Komutlar:</strong> /start, /register, /help, /status</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Toplam Kullanıcı</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+              Bot Bilgileri
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{telegramUsers.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktif Kullanıcı</CardTitle>
-            <MessageCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {telegramUsers.filter(user => user.is_active).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pasif Kullanıcı</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {telegramUsers.filter(user => !user.is_active).length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Telegram Kullanıcıları</CardTitle>
-          <CardDescription>
-            Bot'a kayıt olan kullanıcıları görüntüleyin ve yönetin
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Müşteri</th>
-                  <th className="text-left p-2">Telegram Bilgileri</th>
-                  <th className="text-left p-2">Durum</th>
-                  <th className="text-left p-2">Kayıt Tarihi</th>
-                  <th className="text-left p-2">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {telegramUsers.map((user) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">
-                      <div>
-                        <div className="font-medium">{user.customers.name}</div>
-                        <div className="text-sm text-gray-500">{user.customers.email}</div>
-                      </div>
-                    </td>
-                    <td className="p-2">
-                      <div>
-                        <div className="font-medium">
-                          {user.telegram_username ? `@${user.telegram_username}` : 'Kullanıcı adı yok'}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {user.telegram_first_name} {user.telegram_last_name}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          Chat ID: {user.telegram_chat_id}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-2">
-                      <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                        {user.is_active ? 'Aktif' : 'Pasif'}
-                      </Badge>
-                    </td>
-                    <td className="p-2">{formatDate(user.created_at)}</td>
-                    <td className="p-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleToggleUserStatus(user.id, user.is_active)}
-                      >
-                        {user.is_active ? 'Pasif Et' : 'Aktif Et'}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {telegramUsers.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                Henüz Telegram kullanıcısı bulunmuyor.
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Current Settings */}
-      {reminderSettings && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Mevcut Ayarlar</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Hatırlatma Saati</Label>
-                <p className="text-lg font-medium">{reminderSettings.reminder_time}</p>
-              </div>
-              <div>
-                <Label>Hatırlatma Günleri</Label>
-                <div className="flex gap-1 mt-1">
-                  {(reminderSettings.reminder_days_before || []).map(day => (
-                    <Badge key={day} variant="outline">{day} gün</Badge>
-                  ))}
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-6 bg-gradient-to-r from-muted/30 to-muted/10 rounded-xl border">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
+                    <div className="p-1.5 bg-primary/10 rounded-full">
+                      <MessageCircle className="h-4 w-4 text-primary" />
+                    </div>
+                    @{botUsername}
+                  </h3>
+                  <p className="text-muted-foreground">Müşteriler bu botu kullanarak kayıt olabilir</p>
+                </div>
+                <div className="flex gap-3 mt-4 lg:mt-0">
+                  <Button variant="outline" onClick={copyBotLink} className="hover:scale-105 transition-transform">
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copied ? 'Kopyalandı' : 'Linki Kopyala'}
+                  </Button>
+                  <Button asChild className="hover:scale-105 transition-transform shadow-md">
+                    <a href={botLink} target="_blank" rel="noopener noreferrer">
+                      Bot'u Aç
+                    </a>
+                  </Button>
                 </div>
               </div>
-              <div>
-                <Label>E-posta</Label>
-                <Badge variant={reminderSettings.email_enabled ? 'default' : 'secondary'}>
-                  {reminderSettings.email_enabled ? 'Aktif' : 'Pasif'}
-                </Badge>
+              <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+                <div className="text-sm font-medium text-foreground">
+                  <span className="text-primary">Kullanım:</span> Müşteriler botu başlatıp <code className="bg-muted px-1.5 py-0.5 rounded text-xs">/register</code> komutu ile kayıt olabilir.
+                </div>
+                <div className="text-sm font-medium text-foreground">
+                  <span className="text-primary">Komutlar:</span> /start, /register, /help, /status
+                </div>
               </div>
-              <div>
-                <Label>Telegram</Label>
-                <Badge variant={reminderSettings.telegram_enabled ? 'default' : 'secondary'}>
-                  {reminderSettings.telegram_enabled ? 'Aktif' : 'Pasif'}
-                </Badge>
+            </div>
+        </CardContent>
+      </Card>
+
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Kullanıcı</CardTitle>
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Users className="h-5 w-5 text-primary" />
               </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">{telegramUsers.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Kayıtlı kullanıcı</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aktif Kullanıcı</CardTitle>
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <MessageCircle className="h-5 w-5 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">
+                {telegramUsers.filter(user => user.is_active).length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Mesaj alıyor</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pasif Kullanıcı</CardTitle>
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <Users className="h-5 w-5 text-red-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-600">
+                {telegramUsers.filter(user => !user.is_active).length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Mesaj almıyor</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Users Table */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-muted/30 to-muted/10 border-b">
+            <CardTitle className="text-xl">Telegram Kullanıcıları</CardTitle>
+            <CardDescription>
+              Bot'a kayıt olan kullanıcıları görüntüleyin ve yönetin
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/20">
+                    <th className="text-left p-4 font-semibold">Müşteri</th>
+                    <th className="text-left p-4 font-semibold">Telegram Bilgileri</th>
+                    <th className="text-left p-4 font-semibold">Durum</th>
+                    <th className="text-left p-4 font-semibold">Kayıt Tarihi</th>
+                    <th className="text-left p-4 font-semibold">İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {telegramUsers.map((user) => (
+                    <tr key={user.id} className="border-b hover:bg-muted/30 transition-colors">
+                      <td className="p-4">
+                        <div>
+                          <div className="font-semibold text-foreground">{user.customers.name}</div>
+                          <div className="text-sm text-muted-foreground">{user.customers.email}</div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div>
+                          <div className="font-medium text-foreground">
+                            {user.telegram_username ? `@${user.telegram_username}` : 'Kullanıcı adı yok'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {user.telegram_first_name} {user.telegram_last_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground/70">
+                            Chat ID: {user.telegram_chat_id}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <Badge variant={user.is_active ? 'default' : 'secondary'} className="font-medium">
+                          {user.is_active ? 'Aktif' : 'Pasif'}
+                        </Badge>
+                      </td>
+                      <td className="p-4 text-muted-foreground">{formatDate(user.created_at)}</td>
+                      <td className="p-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleToggleUserStatus(user.id, user.is_active)}
+                          className="hover:scale-105 transition-transform"
+                        >
+                          {user.is_active ? 'Pasif Et' : 'Aktif Et'}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {telegramUsers.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-lg font-medium">Henüz Telegram kullanıcısı bulunmuyor</p>
+                  <p className="text-sm">Müşteriler botu kullanarak kayıt olabilir</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Current Settings */}
+        {reminderSettings && (
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-muted/30 to-muted/10 border-b">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Settings className="h-5 w-5 text-primary" />
+                </div>
+                Mevcut Ayarlar
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-muted-foreground">Hatırlatma Saati</Label>
+                  <p className="text-xl font-bold text-foreground">{reminderSettings.reminder_time}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-muted-foreground">Hatırlatma Günleri</Label>
+                  <div className="flex gap-2 mt-1">
+                    {(reminderSettings.reminder_days_before || []).map(day => (
+                      <Badge key={day} variant="outline" className="font-medium">{day} gün</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-muted-foreground">E-posta</Label>
+                  <div>
+                    <Badge variant={reminderSettings.email_enabled ? 'default' : 'secondary'} className="font-medium">
+                      {reminderSettings.email_enabled ? 'Aktif' : 'Pasif'}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-muted-foreground">Telegram</Label>
+                  <div>
+                    <Badge variant={reminderSettings.telegram_enabled ? 'default' : 'secondary'} className="font-medium">
+                      {reminderSettings.telegram_enabled ? 'Aktif' : 'Pasif'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }

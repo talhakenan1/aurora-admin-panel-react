@@ -285,257 +285,291 @@ const DebtManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Borç Yönetimi</h1>
-          <p className="text-muted-foreground">Müşteri borçlarını takip edin ve hatırlatmalar gönderin</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleSendReminders} className="flex items-center gap-2">
-            <Send className="h-4 w-4" />
-            Hatırlatma Gönder
-          </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Yeni Borç
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="bg-card rounded-xl border shadow-sm p-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Borç Yönetimi
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Müşteri borçlarını takip edin ve hatırlatmalar gönderin
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={handleSendReminders} size="lg" variant="outline" className="flex items-center gap-2 hover:scale-105 transition-transform">
+                <Send className="h-4 w-4" />
+                Hatırlatma Gönder
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Yeni Borç Ekle</DialogTitle>
-                <DialogDescription>
-                  Müşteri için yeni bir borç kaydı oluşturun.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="customer">Müşteri</Label>
-                  <Select value={newDebt.customer_id} onValueChange={(value) => setNewDebt({...newDebt, customer_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Müşteri seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="amount">Tutar (₺)</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    value={newDebt.amount}
-                    onChange={(e) => setNewDebt({...newDebt, amount: e.target.value})}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="due_date">Vade Tarihi</Label>
-                  <Input
-                    id="due_date"
-                    type="date"
-                    value={newDebt.due_date}
-                    onChange={(e) => setNewDebt({...newDebt, due_date: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Açıklama</Label>
-                  <Textarea
-                    id="description"
-                    value={newDebt.description}
-                    onChange={(e) => setNewDebt({...newDebt, description: e.target.value})}
-                    placeholder="Borç açıklaması..."
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    İptal
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="flex items-center gap-2 hover:scale-105 transition-transform shadow-lg">
+                    <Plus className="h-4 w-4" />
+                    Yeni Borç
                   </Button>
-                  <Button onClick={handleAddDebt}>
-                    Ekle
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Yeni Borç Ekle</DialogTitle>
+                    <DialogDescription>
+                      Müşteri için yeni bir borç kaydı oluşturun.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="customer">Müşteri</Label>
+                      <Select value={newDebt.customer_id} onValueChange={(value) => setNewDebt({...newDebt, customer_id: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Müşteri seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {customers.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              {customer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="amount">Tutar (₺)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        value={newDebt.amount}
+                        onChange={(e) => setNewDebt({...newDebt, amount: e.target.value})}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="due_date">Vade Tarihi</Label>
+                      <Input
+                        id="due_date"
+                        type="date"
+                        value={newDebt.due_date}
+                        onChange={(e) => setNewDebt({...newDebt, due_date: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Açıklama</Label>
+                      <Textarea
+                        id="description"
+                        value={newDebt.description}
+                        onChange={(e) => setNewDebt({...newDebt, description: e.target.value})}
+                        placeholder="Borç açıklaması..."
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                        İptal
+                      </Button>
+                      <Button onClick={handleAddDebt}>
+                        Ekle
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Toplam Borç</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(debts.reduce((sum, debt) => debt.status === 'pending' ? sum + debt.amount : sum, 0))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bekleyen Borçlar</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {debts.filter(debt => debt.status === 'pending').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gecikmiş Borçlar</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {debts.filter(debt => debt.status === 'overdue' || (debt.status === 'pending' && new Date(debt.due_date) < new Date())).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Müşteri Sayısı</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {customers.length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Borç</CardTitle>
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <DollarSign className="h-5 w-5 text-primary" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {formatCurrency(debts.reduce((sum, debt) => debt.status === 'pending' ? sum + debt.amount : sum, 0))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Ödenmemiş</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Bekleyen Borçlar</CardTitle>
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {debts.filter(debt => debt.status === 'pending').length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Beklemede</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Gecikmiş Borçlar</CardTitle>
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <Calendar className="h-5 w-5 text-red-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {debts.filter(debt => debt.status === 'overdue' || (debt.status === 'pending' && new Date(debt.due_date) < new Date())).length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Vade geçmiş</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Müşteri Sayısı</CardTitle>
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <User className="h-5 w-5 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {customers.length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Toplam müşteri</p>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Debts Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Borç Listesi</CardTitle>
-          <CardDescription>
-            Tüm müşteri borçlarını görüntüleyin ve yönetin
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Müşteri</th>
-                  <th className="text-left p-2">Tutar</th>
-                  <th className="text-left p-2">Vade Tarihi</th>
-                  <th className="text-left p-2">Durum</th>
-                  <th className="text-left p-2">Açıklama</th>
-                  <th className="text-left p-2">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {debts.map((debt) => (
-                  <tr key={debt.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">
-                      <div>
-                        <div className="font-medium">{debt.customers.name}</div>
-                        <div className="text-sm text-gray-500">{debt.customers.email}</div>
-                      </div>
-                    </td>
-                    <td className="p-2 font-medium">{formatCurrency(debt.amount)}</td>
-                    <td className="p-2">
-                      <div className={`${new Date(debt.due_date) < new Date() && debt.status === 'pending' ? 'text-red-600 font-medium' : ''}`}>
-                        {formatDate(debt.due_date)}
-                      </div>
-                    </td>
-                    <td className="p-2">{getStatusBadge(debt.status)}</td>
-                    <td className="p-2 max-w-xs truncate">{debt.description || '-'}</td>
-                    <td className="p-2">
-                      <div className="flex gap-1">
-                        {debt.status === 'pending' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUpdateDebtStatus(debt.id, 'paid')}
-                          >
-                            Ödendi
-                          </Button>
-                        )}
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Borcu Sil</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Bu borç kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>İptal</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteDebt(debt.id)}>
-                                Sil
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </td>
+        {/* Debts Table */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-muted/30 to-muted/10 border-b">
+            <CardTitle className="text-xl">Borç Listesi</CardTitle>
+            <CardDescription>
+              Tüm müşteri borçlarını görüntüleyin ve yönetin
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/20">
+                    <th className="text-left p-4 font-semibold">Müşteri</th>
+                    <th className="text-left p-4 font-semibold">Tutar</th>
+                    <th className="text-left p-4 font-semibold">Vade Tarihi</th>
+                    <th className="text-left p-4 font-semibold">Durum</th>
+                    <th className="text-left p-4 font-semibold">Açıklama</th>
+                    <th className="text-left p-4 font-semibold">İşlemler</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {debts.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                Henüz borç kaydı bulunmuyor.
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Reminders */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Son Hatırlatmalar</CardTitle>
-          <CardDescription>
-            Gönderilen hatırlatmaların geçmişi
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {reminders.slice(0, 10).map((reminder) => (
-              <div key={reminder.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center gap-2">
-                  <Badge variant={reminder.reminder_type === 'email' ? 'default' : 'secondary'}>
-                    {reminder.reminder_type === 'email' ? 'E-posta' : 'Telegram'}
-                  </Badge>
-                  <span className="text-sm">
-                    {reminder.sent_at ? formatDate(reminder.sent_at) : 'Gönderilmedi'}
-                  </span>
+                </thead>
+                <tbody>
+                  {debts.map((debt) => (
+                    <tr key={debt.id} className="border-b hover:bg-muted/30 transition-colors">
+                      <td className="p-4">
+                        <div>
+                          <div className="font-semibold text-foreground">{debt.customers.name}</div>
+                          <div className="text-sm text-muted-foreground">{debt.customers.email}</div>
+                        </div>
+                      </td>
+                      <td className="p-4 font-bold text-lg text-foreground">{formatCurrency(debt.amount)}</td>
+                      <td className="p-4">
+                        <div className={`font-medium ${new Date(debt.due_date) < new Date() && debt.status === 'pending' ? 'text-red-600' : 'text-foreground'}`}>
+                          {formatDate(debt.due_date)}
+                        </div>
+                      </td>
+                      <td className="p-4">{getStatusBadge(debt.status)}</td>
+                      <td className="p-4 max-w-xs">
+                        <div className="truncate text-muted-foreground">
+                          {debt.description || '-'}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          {debt.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUpdateDebtStatus(debt.id, 'paid')}
+                              className="hover:scale-105 transition-transform"
+                            >
+                              Ödendi
+                            </Button>
+                          )}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 hover:scale-105 transition-transform">
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Borcu Sil</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Bu borç kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>İptal</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteDebt(debt.id)}>
+                                  Sil
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {debts.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <DollarSign className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-lg font-medium">Henüz borç kaydı bulunmuyor</p>
+                  <p className="text-sm">Yeni borç ekleyerek başlayın</p>
                 </div>
-                <Badge variant={reminder.status === 'sent' ? 'default' : 'destructive'}>
-                  {reminder.status === 'sent' ? 'Gönderildi' : 'Başarısız'}
-                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Reminders */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-muted/30 to-muted/10 border-b">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Clock className="h-5 w-5 text-primary" />
               </div>
-            ))}
-            {reminders.length === 0 && (
-              <div className="text-center py-4 text-gray-500">
-                Henüz hatırlatma gönderilmemiş.
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              Son Hatırlatmalar
+            </CardTitle>
+            <CardDescription>
+              Gönderilen hatırlatmaların geçmişi
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-3">
+              {reminders.slice(0, 10).map((reminder) => (
+                <div key={reminder.id} className="flex items-center justify-between p-4 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={reminder.reminder_type === 'email' ? 'default' : 'secondary'} className="font-medium">
+                      {reminder.reminder_type === 'email' ? 'E-posta' : 'Telegram'}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground font-medium">
+                      {reminder.sent_at ? formatDate(reminder.sent_at) : 'Gönderilmedi'}
+                    </span>
+                  </div>
+                  <Badge variant={reminder.status === 'sent' ? 'default' : 'destructive'} className="font-medium">
+                    {reminder.status === 'sent' ? 'Gönderildi' : 'Başarısız'}
+                  </Badge>
+                </div>
+              ))}
+              {reminders.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Send className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-lg font-medium">Henüz hatırlatma gönderilmemiş</p>
+                  <p className="text-sm">Hatırlatma göndererek başlayın</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
