@@ -284,6 +284,39 @@ export type Database = {
           },
         ]
       }
+      telegram_messages: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          message_text: string | null
+          message_type: string
+          metadata: Json | null
+          telegram_chat_id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          direction?: string
+          id?: string
+          message_text?: string | null
+          message_type?: string
+          metadata?: Json | null
+          telegram_chat_id: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          message_text?: string | null
+          message_type?: string
+          metadata?: Json | null
+          telegram_chat_id?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       telegram_users: {
         Row: {
           created_at: string
@@ -330,7 +363,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      find_customer_by_phone: {
+        Args: { phone_number: string }
+        Returns: {
+          customer_id: string
+          customer_name: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
