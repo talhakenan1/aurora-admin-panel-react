@@ -80,14 +80,12 @@ serve(async (req: Request) => {
         due_date,
         description,
         user_id,
+        customer_id,
         customers!inner(
           id,
           name,
-          email
-        ),
-        telegram_users(
-          telegram_chat_id,
-          is_active
+          email,
+          phone
         )
       `)
       .eq('status', 'pending')
@@ -166,36 +164,41 @@ serve(async (req: Request) => {
           `Lütfen en kısa sürede ödemenizi gerçekleştirin.\n\n` +
           `Teşekkürler! 🙏`
 
-        // Send Telegram reminder if user has Telegram
-        if (debt.telegram_users && debt.telegram_users.length > 0) {
-          const telegramUser = debt.telegram_users[0]
-          if (telegramUser.is_active) {
-            const telegramSent = await sendTelegramMessage(
-              telegramUser.telegram_chat_id,
-              messageContent
-            )
+        // Check if customer has Telegram and send reminder
+        const { data: telegramUsers, error: telegramError } = await supabaseClient
+          .from('telegram_users')
+          .select('telegram_chat_id, is_active')
+          .eq('customer_id', debt.customer_id)
+          .eq('is_active', true)
+          .limit(1)
 
-            // Log telegram reminder
-            await supabaseClient
-              .from('reminders')
-              .insert({
-                debt_id: debt.id,
-                user_id: debt.user_id,
-                reminder_type: 'telegram',
-                scheduled_date: new Date().toISOString(),
-                sent_at: telegramSent ? new Date().toISOString() : null,
-                status: telegramSent ? 'sent' : 'failed',
-                message_content: messageContent,
-                error_message: telegramSent ? null : 'Failed to send telegram message'
-              })
+        if (!telegramError && telegramUsers && telegramUsers.length > 0) {
+          const telegramUser = telegramUsers[0]
+          const telegramSent = await sendTelegramMessage(
+            telegramUser.telegram_chat_id,
+            messageContent
+          )
 
-            if (telegramSent) {
-              sentCount++
-              console.log(`Telegram reminder sent for debt ${debt.id}`)
-            } else {
-              errorCount++
-              console.log(`Failed to send telegram reminder for debt ${debt.id}`)
-            }
+          // Log telegram reminder
+          await supabaseClient
+            .from('reminders')
+            .insert({
+              debt_id: debt.id,
+              user_id: debt.user_id,
+              reminder_type: 'telegram',
+              scheduled_date: new Date().toISOString(),
+              sent_at: telegramSent ? new Date().toISOString() : null,
+              status: telegramSent ? 'sent' : 'failed',
+              message_content: messageContent,
+              error_message: telegramSent ? null : 'Failed to send telegram message'
+            })
+
+          if (telegramSent) {
+            sentCount++
+            console.log(`Telegram reminder sent for debt ${debt.id}`)
+          } else {
+            errorCount++
+            console.log(`Failed to send telegram reminder for debt ${debt.id}`)
           }
         }
 

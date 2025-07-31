@@ -211,6 +211,61 @@ const DebtManagement: React.FC = () => {
     }
   }
 
+  const handleSendReminderToCustomer = async (debtId: string, customerName: string) => {
+    try {
+      if (!user?.id) {
+        toast({
+          title: 'Hata',
+          description: 'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      toast({
+        title: 'Bilgi',
+        description: `${customerName} müşterisine hatırlatma gönderiliyor...`
+      })
+
+      // Send telegram message using the debt ID
+      const debt = debts.find(d => d.id === debtId)
+      if (!debt?.customers?.phone) {
+        toast({
+          title: 'Hata',
+          description: 'Müşterinin telefon numarası bulunamadı.',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      const { data, error } = await supabase.functions.invoke('telegram-send-message', {
+        body: { 
+          phone_number: debt.customers.phone,
+          debt_id: debtId
+        }
+      })
+      
+      if (error) {
+        console.error('Supabase function error:', error)
+        throw new Error(error.message || 'Telegram mesajı gönderilirken hata oluştu')
+      }
+
+      toast({
+        title: 'Başarılı',
+        description: `${customerName} müşterisine hatırlatma gönderildi.`
+      })
+
+      fetchData()
+    } catch (error: any) {
+      console.error('Error sending reminder:', error)
+      toast({
+        title: 'Hata',
+        description: error?.message || 'Hatırlatma gönderilirken bir hata oluştu.',
+        variant: 'destructive'
+      })
+    }
+  }
+
   const handleSendReminders = async () => {
     try {
       if (!user?.id) {
@@ -481,6 +536,15 @@ const DebtManagement: React.FC = () => {
                       </td>
                       <td className="p-4">
                         <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSendReminderToCustomer(debt.id, debt.customers.name)}
+                            className="flex items-center gap-1 hover:scale-105 transition-transform"
+                          >
+                            <Send className="h-3 w-3" />
+                            Hatırlatma
+                          </Button>
                           {debt.status === 'pending' && (
                             <Button
                               size="sm"

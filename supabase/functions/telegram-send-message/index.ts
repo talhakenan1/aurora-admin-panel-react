@@ -1,68 +1,176 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
-serve(async (req) => {
+serve(async (req: Request) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const telegramBotToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
-    if (!telegramBotToken) {
-      throw new Error('TELEGRAM_BOT_TOKEN not configured');
-    }
-
-    const { chatId, message, parseMode = 'HTML' } = await req.json();
-
-    if (!chatId || !message) {
-      throw new Error('chatId and message are required');
-    }
-
-    console.log(`Sending message to chat ${chatId}: ${message}`);
-
-    const telegramUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
     
-    const response = await fetch(telegramUrl, {
+    if (!supabaseUrl || !supabaseKey || !botToken) {
+      console.error('Missing required environment variables')
+      return new Response('Server configuration error', { status: 500, headers: corsHeaders })
+    }
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseKey)
+
+    // Parse request body
+    const { phone_number, debt_id } = await req.json()
+
+    if (!phone_number || !debt_id) {
+      return new Response('Phone number and debt ID are required', { status: 400, headers: corsHeaders })
+    }
+
+    console.log('Sending reminder to phone:', phone_number, 'for debt:', debt_id)
+
+    // Get debt details
+    const { data: debt, error: debtError } = await supabaseClient
+      .from('debts')
+      .select(`
+        id,
+        amount,
+        due_date,
+        description,
+        customers!inner(
+          id,
+          name,
+          email,
+          phone
+        )
+      `)
+      .eq('id', debt_id)
+      .single()
+
+    if (debtError || !debt) {
+      console.error('Error fetching debt:', debtError)
+      return new Response('Debt not found', { status: 404, headers: corsHeaders })
+    }
+
+    // Find customer by phone using the RPC function
+    const { data: customerData, error: customerError } = await supabaseClient
+      .rpc('find_customer_by_phone', { phone_number })
+
+    if (customerError || !customerData || customerData.length === 0) {
+      console.error('Customer not found for phone:', phone_number)
+      return new Response('Customer not found for this phone number', { status: 404, headers: corsHeaders })
+    }
+
+    const customerId = customerData[0].customer_id
+
+    // Find telegram user for this customer
+    const { data: telegramUser, error: telegramError } = await supabaseClient
+      .from('telegram_users')
+      .select('telegram_chat_id, is_active')
+      .eq('customer_id', customerId)
+      .eq('is_active', true)
+      .single()
+
+    if (telegramError || !telegramUser) {
+      console.error('Telegram user not found for customer:', customerId)
+      return new Response('Customer does not have an active Telegram account', { status: 404, headers: corsHeaders })
+    }
+
+    // Prepare message content
+    const dueDate = new Date(debt.due_date)
+    const today = new Date()
+    const isToday = debt.due_date === today.toISOString().split('T')[0]
+    const dayText = isToday ? 'BUGÜN' : 'yakında'
+    const urgencyEmoji = isToday ? '🚨' : '⏰'
+
+    // Format amount with Turkish Lira
+    const formattedAmount = new Intl.NumberFormat('tr-TR', {
+      style: 'currency',
+      currency: 'TRY'
+    }).format(debt.amount)
+
+    // Format date
+    const formattedDate = dueDate.toLocaleDateString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+
+    const messageContent = 
+      `${urgencyEmoji} **BORÇ HATIRLATMASI** ${urgencyEmoji}\n\n` +
+      `Sayın **${debt.customers.name}**,\n\n` +
+      `💰 **Tutar:** ${formattedAmount}\n` +
+      `📅 **Vade Tarihi:** ${formattedDate} (${dayText})\n` +
+      `📝 **Açıklama:** ${debt.description ?? 'Belirtilmemiş'}\n\n` +
+      `${isToday ? '⚠️ Ödeme vadesi bugün dolmaktadır!' : '📢 Ödeme vadesi yaklaşmaktadır.'}\n\n` +
+      `Lütfen en kısa sürede ödemenizi gerçekleştirin.\n\n` +
+      `Teşekkürler! 🙏`
+
+    // Send Telegram message
+    const telegramSent = await sendTelegramMessage(telegramUser.telegram_chat_id, messageContent, botToken)
+
+    // Log reminder
+    await supabaseClient
+      .from('reminders')
+      .insert({
+        debt_id: debt.id,
+        user_id: debt.customers.id, // This should be the business user_id, but we'll use customer for now
+        reminder_type: 'telegram',
+        scheduled_date: new Date().toISOString(),
+        sent_at: telegramSent ? new Date().toISOString() : null,
+        status: telegramSent ? 'sent' : 'failed',
+        message_content: messageContent,
+        error_message: telegramSent ? null : 'Failed to send telegram message'
+      })
+
+    if (telegramSent) {
+      console.log('Telegram reminder sent successfully')
+      return new Response(JSON.stringify({ success: true, message: 'Reminder sent successfully' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    } else {
+      return new Response(JSON.stringify({ success: false, message: 'Failed to send telegram message' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+  } catch (error) {
+    console.error('Error in telegram-send-message function:', error)
+    return new Response('Internal Server Error', { status: 500, headers: corsHeaders })
+  }
+})
+
+async function sendTelegramMessage(chatId: number, text: string, botToken: string): Promise<boolean> {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`
+  
+  try {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         chat_id: chatId,
-        text: message,
-        parse_mode: parseMode,
-      }),
-    });
-
-    const result = await response.json();
+        text: text,
+        parse_mode: 'Markdown'
+      })
+    })
 
     if (!response.ok) {
-      console.error('Telegram API error:', result);
-      throw new Error(`Telegram API error: ${result.description || 'Unknown error'}`);
+      const errorText = await response.text()
+      console.error('Telegram API error:', errorText)
+      return false
     }
 
-    console.log('Message sent successfully:', result);
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      messageId: result.result.message_id 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+    return true
   } catch (error) {
-    console.error('Error in telegram-send-message:', error);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: (error as Error).message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error sending telegram message:', error)
+    return false
   }
-});
+}
