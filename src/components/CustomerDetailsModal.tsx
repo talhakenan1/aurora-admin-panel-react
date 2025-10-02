@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCustomers } from "@/hooks/useCustomers";
 
 interface CustomerDetailsModalProps {
   customer: any;
@@ -15,6 +16,16 @@ interface CustomerDetailsModalProps {
 
 export function CustomerDetailsModal({ customer, isOpen, onClose }: CustomerDetailsModalProps) {
   const { user } = useAuth();
+  const { deleteCustomer, isDeletingCustomer } = useCustomers();
+  
+  const handleDeleteCustomer = () => {
+    if (window.confirm(
+      "Bu müşteriyi silmek istediğinizden emin misiniz? Bu işlem müşterinin tüm siparişlerini ve reçetelerini de silecektir ve geri alınamaz."
+    )) {
+      deleteCustomer(customer.id);
+      onClose();
+    }
+  };
   
   const { data: customerOrders = [], isLoading } = useQuery({
     queryKey: ["customer-orders", customer.id, user?.id],
@@ -341,7 +352,15 @@ export function CustomerDetailsModal({ customer, isOpen, onClose }: CustomerDeta
             )}
           </div>
 
-          <div className="flex justify-end pt-4 border-t dark:border-gray-700">
+          <div className="flex justify-between pt-4 border-t dark:border-gray-700">
+            <Button 
+              onClick={handleDeleteCustomer}
+              disabled={isDeletingCustomer}
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeletingCustomer ? "Siliniyor..." : "Müşteriyi Sil"}
+            </Button>
             <Button onClick={onClose}>Kapat</Button>
           </div>
         </div>

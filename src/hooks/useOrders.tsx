@@ -81,11 +81,47 @@ export function useOrders() {
     },
   });
 
+  const deleteOrder = useMutation({
+    mutationFn: async (orderId: string) => {
+      if (!user) throw new Error("User not authenticated");
+      
+      const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", orderId)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error deleting order:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
+      toast({
+        title: "Başarılı",
+        description: "Sipariş başarıyla silindi",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Order deletion error:", error);
+      toast({
+        title: "Hata",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     orders,
     isLoading,
     error,
     updateOrderStatus: updateOrderStatus.mutate,
     isUpdatingOrder: updateOrderStatus.isPending,
+    deleteOrder: deleteOrder.mutate,
+    isDeletingOrder: deleteOrder.isPending,
   };
 }

@@ -140,8 +140,10 @@ supabase db push
 ### Otomatik Hatırlatmalar
 
 - Sistem her gün saat 09:00'da çalışır
-- Vadesi gelen/geçen borçlar için hatırlatma gönderir
+- **DÜN vadesi geçmiş** borçlar için gecikme bildirimi gönderir
+- Örnek: Son ödeme tarihi 02.09.2025 olan borç için 03.09.2025 sabah 09:00'da bildirim
 - Hem e-posta hem Telegram üzerinden bildirim
+- Gecikme süresi (kaç gün gecikmeli olduğu) mesajda belirtilir
 
 ## 🔧 Yapılandırma
 

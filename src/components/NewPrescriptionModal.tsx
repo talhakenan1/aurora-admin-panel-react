@@ -138,31 +138,7 @@ export function NewPrescriptionModal({ isOpen, onClose }: NewPrescriptionModalPr
             const firstName = nameParts[0] || "";
             const lastName = nameParts.slice(1).join(" ") || "";
 
-            // Get the most recent prescription for this customer and user
-            const { data: lastPrescription } = await supabase
-              .from("prescriptions")
-              .select("prescription_data")
-              .eq("customer_id", customer.id)
-              .eq("user_id", user.id)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            let prescriptionData: any = {};
-            if (lastPrescription && lastPrescription.prescription_data) {
-              // Safely parse prescription data
-              try {
-                if (typeof lastPrescription.prescription_data === 'string') {
-                  prescriptionData = JSON.parse(lastPrescription.prescription_data);
-                } else if (typeof lastPrescription.prescription_data === 'object') {
-                  prescriptionData = lastPrescription.prescription_data;
-                }
-              } catch (error) {
-                console.error("Error parsing prescription data:", error);
-                prescriptionData = {};
-              }
-            }
-
+            // Only fill customer information, not prescription details
             setFormData(prev => ({
               ...prev,
               firstName,
@@ -170,22 +146,6 @@ export function NewPrescriptionModal({ isOpen, onClose }: NewPrescriptionModalPr
               email: customer.email || "",
               phone: customer.phone || "",
               address: customer.address || "",
-              // Fill prescription details from last prescription if available
-              visionType: prescriptionData.visionType || "",
-              sph: prescriptionData.sph || "",
-              cyl: prescriptionData.cyl || "",
-              axis: prescriptionData.axis || "",
-              distanceVision: prescriptionData.distanceVision || "",
-              nearVision: prescriptionData.nearVision || "",
-              add: prescriptionData.add || "",
-              pd: prescriptionData.pd || "",
-              lensType: prescriptionData.lensType || "",
-              rightEye: prescriptionData.rightEye || { sph: "", cyl: "", axis: "" },
-              leftEye: prescriptionData.leftEye || { sph: "", cyl: "", axis: "" },
-              rightEyeFar: prescriptionData.rightEyeFar || { sph: "", cyl: "", axis: "", lensType: "", lensColor: "" },
-              rightEyeNear: prescriptionData.rightEyeNear || { sph: "", cyl: "", axis: "", lensType: "", lensColor: "" },
-              leftEyeFar: prescriptionData.leftEyeFar || { sph: "", cyl: "", axis: "", lensType: "", lensColor: "" },
-              leftEyeNear: prescriptionData.leftEyeNear || { sph: "", cyl: "", axis: "", lensType: "", lensColor: "" },
             }));
           }
         } catch (error) {

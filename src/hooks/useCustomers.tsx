@@ -108,11 +108,72 @@ export function useCustomers() {
     },
   });
 
+  const deleteCustomer = useMutation({
+    mutationFn: async (customerId: string) => {
+      if (!user) throw new Error("User not authenticated");
+      
+      // First, delete all orders associated with this customer
+      const { error: ordersError } = await supabase
+        .from("orders")
+        .delete()
+        .eq("customer_id", customerId)
+        .eq("user_id", user.id);
+      
+      if (ordersError) {
+        console.error("Error deleting customer orders:", ordersError);
+        throw ordersError;
+      }
+      
+      // Then, delete all prescriptions associated with this customer
+      const { error: prescriptionsError } = await supabase
+        .from("prescriptions")
+        .delete()
+        .eq("customer_id", customerId)
+        .eq("user_id", user.id);
+      
+      if (prescriptionsError) {
+        console.error("Error deleting customer prescriptions:", prescriptionsError);
+        throw prescriptionsError;
+      }
+      
+      // Finally, delete the customer
+      const { error } = await supabase
+        .from("customers")
+        .delete()
+        .eq("id", customerId)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error deleting customer:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["orders", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats", user?.id] });
+      toast({
+        title: "Başarılı",
+        description: "Müşteri ve ilişkili tüm veriler başarıyla silindi",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Customer deletion error:", error);
+      toast({
+        title: "Hata",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     customers,
     isLoading,
     error,
     addCustomer: addCustomer.mutate,
     isAddingCustomer: addCustomer.isPending,
+    deleteCustomer: deleteCustomer.mutate,
+    isDeletingCustomer: deleteCustomer.isPending,
   };
 }

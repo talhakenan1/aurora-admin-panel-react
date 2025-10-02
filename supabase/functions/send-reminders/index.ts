@@ -61,17 +61,17 @@ serve(async (req: Request) => {
     const userIdFilter = requestBody.user_id
     console.log('Starting reminder check...', userIdFilter ? `for user: ${userIdFilter}` : 'for all users')
 
-    // Get current date and tomorrow's date
+    // Get current date and yesterday's date
     const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
     
     const todayStr = today.toISOString().split('T')[0]
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+    const yesterdayStr = yesterday.toISOString().split('T')[0]
 
-    console.log(`Checking for debts due on ${todayStr} and ${tomorrowStr}`)
+    console.log(`Checking for overdue debts with due date: ${yesterdayStr} (yesterday)`)
 
-    // Get debts that are due today or tomorrow and are still pending
+    // Get debts that had due date yesterday and are still pending (now overdue)
     let debtsQuery = supabaseClient
       .from('debts')
       .select(`
@@ -89,7 +89,7 @@ serve(async (req: Request) => {
         )
       `)
       .eq('status', 'pending')
-      .in('due_date', [todayStr, tomorrowStr])
+      .eq('due_date', yesterdayStr)
 
     // Add user filter if provided
     if (userIdFilter) {
@@ -115,11 +115,12 @@ serve(async (req: Request) => {
 
     for (const debt of debts as DebtWithCustomer[]) {
       try {
-        // Check if reminder already sent today
+        // Check if reminder already sent for this debt (to avoid duplicate notifications)
         const { data: existingReminder, error: reminderError } = await supabaseClient
           .from('reminders')
           .select('id')
           .eq('debt_id', debt.id)
+          .eq('reminder_type', 'telegram')
           .gte('created_at', todayStr)
           .maybeSingle()
 
@@ -130,15 +131,13 @@ serve(async (req: Request) => {
         }
 
         if (existingReminder) {
-          console.log(`Reminder already sent for debt ${debt.id}`)
+          console.log(`Reminder already sent today for debt ${debt.id}`)
           continue
         }
 
         const customer = debt.customers
         const dueDate = new Date(debt.due_date)
-        const isToday = debt.due_date === todayStr
-        const dayText = isToday ? 'BUGÜN' : 'YARIN'
-        const urgencyEmoji = isToday ? '🚨' : '⏰'
+        const urgencyEmoji = '🚨'
 
         // Format amount with Turkish Lira
         const formattedAmount = new Intl.NumberFormat('tr-TR', {
@@ -153,14 +152,19 @@ serve(async (req: Request) => {
           year: 'numeric'
         })
 
-        // Prepare message content
+        // Calculate how many days overdue
+        const daysDiff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
+        const overdueDays = daysDiff > 0 ? daysDiff : 1
+
+        // Prepare message content for overdue debt
         const messageContent = 
-          `${urgencyEmoji} **BORÇ HATIRLATMASI** ${urgencyEmoji}\n\n` +
+          `${urgencyEmoji} **GECİKMİŞ BORÇ BİLDİRİMİ** ${urgencyEmoji}\n\n` +
           `Sayın **${customer.name}**,\n\n` +
           `💰 **Tutar:** ${formattedAmount}\n` +
-          `📅 **Vade Tarihi:** ${formattedDate} (${dayText})\n` +
+          `📅 **Son Ödeme Tarihi:** ${formattedDate}\n` +
+          `⏱️ **Gecikme Süresi:** ${overdueDays} gün\n` +
           `📝 **Açıklama:** ${debt.description ?? 'Belirtilmemiş'}\n\n` +
-          `${isToday ? '⚠️ Ödeme vadesi bugün dolmaktadır!' : '📢 Ödeme vadesi yarın dolacaktır.'}\n\n` +
+          `⚠️ **Ödeme vadesi geçmiştir!**\n\n` +
           `Lütfen en kısa sürede ödemenizi gerçekleştirin.\n\n` +
           `Teşekkürler! 🙏`
 
@@ -202,12 +206,12 @@ serve(async (req: Request) => {
           }
         }
 
-        // Send Email reminder
+        // Send Email reminder (optional, can be removed if only Telegram needed)
         const emailSent = await sendEmailReminder(
           customer.email,
           customer.name,
           messageContent,
-          `Borç Hatırlatması - ${formattedDate}`
+          `Gecikmiş Borç Bildirimi - ${formattedDate}`
         )
 
         // Log email reminder

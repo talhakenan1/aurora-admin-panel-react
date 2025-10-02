@@ -11,11 +11,18 @@ interface OrderDetailsModalProps {
 }
 
 export function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalProps) {
-  const { updateOrderStatus, isUpdatingOrder } = useOrders();
+  const { updateOrderStatus, isUpdatingOrder, deleteOrder, isDeletingOrder } = useOrders();
 
   const handleReturnOrder = () => {
     updateOrderStatus({ id: order.id, status: "returned" });
     onClose();
+  };
+
+  const handleDeleteOrder = () => {
+    if (window.confirm("Bu siparişi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")) {
+      deleteOrder(order.id);
+      onClose();
+    }
   };
 
   const getOrderStatus = (orderDate: string) => {
@@ -145,20 +152,30 @@ export function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalP
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t dark:border-gray-600">
-            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-              Kapat
+          <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 pt-4 border-t dark:border-gray-600">
+            <Button 
+              onClick={handleDeleteOrder}
+              disabled={isDeletingOrder}
+              variant="destructive"
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
+            >
+              {isDeletingOrder ? "Siliniyor..." : "Siparişi Sil"}
             </Button>
-            {displayStatus !== "returned" && (
-              <Button 
-                onClick={handleReturnOrder}
-                disabled={isUpdatingOrder}
-                variant="destructive"
-                className="w-full sm:w-auto"
-              >
-                {isUpdatingOrder ? "İşleniyor..." : "İade Olarak İşaretle"}
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+              <Button variant="outline" onClick={onClose} className="w-full sm:w-auto dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                Kapat
               </Button>
-            )}
+              {displayStatus !== "returned" && (
+                <Button 
+                  onClick={handleReturnOrder}
+                  disabled={isUpdatingOrder}
+                  variant="destructive"
+                  className="w-full sm:w-auto"
+                >
+                  {isUpdatingOrder ? "İşleniyor..." : "İade Olarak İşaretle"}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
