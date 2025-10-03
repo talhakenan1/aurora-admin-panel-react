@@ -73,8 +73,24 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 px-4 sm:px-6 lg:px-8">
+      {/* Logo Section */}
+      <div className="text-center mb-8">
+        <div className="flex justify-center mb-6">
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 animate-pulse"></div>
+            <div className="relative bg-white dark:bg-gray-800 rounded-full p-6 shadow-xl">
+              <Eye className="w-16 h-16 text-blue-600 mx-auto" />
+            </div>
+          </div>
+        </div>
+        
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          Melis Optik
+        </h1>
+      </div>
+
+      <Card className="w-full max-w-md shadow-lg bg-white dark:bg-gray-800">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-2xl font-bold">Şifrenizi Sıfırlayın</CardTitle>
           <p className="text-muted-foreground text-sm">Yeni şifrenizi aşağıya girin</p>
