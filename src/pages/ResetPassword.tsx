@@ -22,14 +22,17 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the required hash fragments for password reset
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
+    // Supabase automatically handles the hash fragments and sets the session
+    // Check if session was established
+    const checkSession = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        setError("Geçersiz veya süresi dolmuş şifre sıfırlama bağlantısı. Lütfen yeni bir tane isteyin.");
+      }
+    };
     
-    if (!accessToken || !refreshToken) {
-      setError("Invalid or expired password reset link. Please request a new one.");
-    }
+    checkSession();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
