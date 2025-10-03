@@ -40,12 +40,12 @@ const ResetPassword = () => {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Şifreler eşleşmiyor.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      setError("Şifre en az 6 karakter olmalıdır.");
       return;
     }
 
@@ -59,8 +59,8 @@ const ResetPassword = () => {
       if (error) throw error;
 
       toast({
-        title: "Password Updated",
-        description: "Your password has been successfully updated.",
+        title: "Şifre Güncellendi",
+        description: "Şifreniz başarıyla güncellendi.",
       });
 
       // Redirect to home page
@@ -73,11 +73,11 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Reset Your Password</CardTitle>
-          <p className="text-gray-600 text-sm">Enter your new password below</p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-2xl font-bold">Şifrenizi Sıfırlayın</CardTitle>
+          <p className="text-muted-foreground text-sm">Yeni şifrenizi aşağıya girin</p>
         </CardHeader>
         <CardContent>
           {error && (
@@ -88,7 +88,7 @@ const ResetPassword = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="password">New Password</Label>
+              <Label htmlFor="password">Yeni Şifre</Label>
               <div className="relative mt-1">
                 <Input
                   id="password"
@@ -96,7 +96,7 @@ const ResetPassword = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter new password"
+                  placeholder="Yeni şifrenizi girin"
                   minLength={6}
                   className="pr-10"
                 />
@@ -117,7 +117,7 @@ const ResetPassword = () => {
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">Yeni Şifreyi Onayla</Label>
               <div className="relative mt-1">
                 <Input
                   id="confirmPassword"
@@ -125,7 +125,7 @@ const ResetPassword = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  placeholder="Confirm new password"
+                  placeholder="Yeni şifrenizi tekrar girin"
                   minLength={6}
                   className="pr-10"
                 />
@@ -148,9 +148,9 @@ const ResetPassword = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+              className="w-full"
             >
-              {loading ? "Updating..." : "Update Password"}
+              {loading ? "Güncelleniyor..." : "Şifreyi Güncelle"}
             </Button>
           </form>
         </CardContent>
