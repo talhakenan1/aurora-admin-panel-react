@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.telegram-bot-setup]
 verify_jwt = true
+
+[functions.check-overdue-debts]
+verify_jwt = false

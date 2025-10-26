@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -93,6 +93,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          daily_enabled: boolean | null
+          id: string
+          minimum_debt_amount: number | null
+          monthly_enabled: boolean | null
+          notification_time: string | null
+          updated_at: string
+          user_id: string
+          weekly_enabled: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          daily_enabled?: boolean | null
+          id?: string
+          minimum_debt_amount?: number | null
+          monthly_enabled?: boolean | null
+          notification_time?: string | null
+          updated_at?: string
+          user_id: string
+          weekly_enabled?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          daily_enabled?: boolean | null
+          id?: string
+          minimum_debt_amount?: number | null
+          monthly_enabled?: boolean | null
+          notification_time?: string | null
+          updated_at?: string
+          user_id?: string
+          weekly_enabled?: boolean | null
+        }
+        Relationships: []
       }
       orders: {
         Row: {
@@ -320,33 +356,36 @@ export type Database = {
       telegram_users: {
         Row: {
           created_at: string
-          customer_id: string
+          customer_id: string | null
           id: string
           is_active: boolean | null
           telegram_chat_id: number
           telegram_username: string | null
           updated_at: string
           user_id: string
+          user_type: string
         }
         Insert: {
           created_at?: string
-          customer_id: string
+          customer_id?: string | null
           id?: string
           is_active?: boolean | null
           telegram_chat_id: number
           telegram_username?: string | null
           updated_at?: string
           user_id: string
+          user_type?: string
         }
         Update: {
           created_at?: string
-          customer_id?: string
+          customer_id?: string | null
           id?: string
           is_active?: boolean | null
           telegram_chat_id?: number
           telegram_username?: string | null
           updated_at?: string
           user_id?: string
+          user_type?: string
         }
         Relationships: [
           {
@@ -357,6 +396,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      verification_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          used: boolean | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          used?: boolean | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

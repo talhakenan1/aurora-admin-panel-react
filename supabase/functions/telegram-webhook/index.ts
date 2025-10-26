@@ -160,13 +160,92 @@ serve(async (req) => {
         });
       }
 
+      // Handle /register_owner command
+      if (text.startsWith('/register_owner ')) {
+        const parts = text.split(' ');
+        if (parts.length !== 2) {
+          const errorMsg = '❌ Kullanım: /register_owner [doğrulama_kodu]\n\nÖrnek: /register_owner 123456';
+          await sendTelegramMessage(chatId, errorMsg);
+          await logMessage(chatId, errorMsg, 'outgoing');
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const code = parts[1];
+
+        // Find verification code
+        const { data: verificationData, error: verificationError } = await supabase
+          .from('verification_codes')
+          .select('*, user_id')
+          .eq('code', code)
+          .eq('used', false)
+          .gt('expires_at', new Date().toISOString())
+          .single();
+
+        if (verificationError || !verificationData) {
+          const errorMsg = '❌ Geçersiz veya süresi dolmuş doğrulama kodu.';
+          await sendTelegramMessage(chatId, errorMsg);
+          await logMessage(chatId, errorMsg, 'outgoing');
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Check if business owner already registered
+        const { data: existingOwner } = await supabase
+          .from('telegram_users')
+          .select('*')
+          .eq('user_id', verificationData.user_id)
+          .eq('user_type', 'business_owner')
+          .single();
+
+        if (existingOwner) {
+          // Update existing registration
+          await supabase
+            .from('telegram_users')
+            .update({
+              telegram_chat_id: chatId,
+              telegram_username: username,
+              is_active: true
+            })
+            .eq('id', existingOwner.id);
+        } else {
+          // Register new business owner
+          await supabase
+            .from('telegram_users')
+            .insert({
+              telegram_chat_id: chatId,
+              telegram_username: username,
+              user_id: verificationData.user_id,
+              customer_id: null,
+              user_type: 'business_owner',
+              is_active: true
+            });
+        }
+
+        // Mark code as used
+        await supabase
+          .from('verification_codes')
+          .update({ used: true })
+          .eq('id', verificationData.id);
+
+        const successMsg = '✅ Telegram hesabınız başarıyla kaydedildi!\n\nArtık gecikmiş borç bildirimleri alacaksınız.';
+        await sendTelegramMessage(chatId, successMsg);
+        await logMessage(chatId, successMsg, 'outgoing', verificationData.user_id);
+
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       // Handle /start command
       if (text === '/start') {
-        const welcomeMsg = `🤖 Merhaba ${firstName}!\n\nBu bot ile müşterilerinize bildirim gönderebilirsiniz.\n\n📝 Komutlar:\n/send [telefon] [mesaj] - Müşteriye mesaj gönder\n/help - Yardım`;
+        const welcomeMsg = `🤖 Merhaba ${firstName}!\n\nBu bot ile müşterilerinize bildirim gönderebilirsiniz.\n\n📝 Komutlar:\n/send [telefon] [mesaj] - Müşteriye mesaj gönder\n/register_owner [kod] - İşletme sahibi olarak kaydol\n/help - Yardım`;
         await sendTelegramMessage(chatId, welcomeMsg);
         await logMessage(chatId, welcomeMsg, 'outgoing');
         
-        // Register user if not exists
+        // Register user if not exists (as customer type by default)
         if (!existingUser) {
           await supabase
             .from('telegram_users')
@@ -175,6 +254,7 @@ serve(async (req) => {
               telegram_username: username,
               user_id: null,
               customer_id: null,
+              user_type: 'customer',
               is_active: true
             });
         }
@@ -186,7 +266,7 @@ serve(async (req) => {
 
       // Handle /help command
       if (text === '/help') {
-        const helpMsg = `📖 Yardım\n\n🔹 /send [telefon] [mesaj]\nBelirtilen telefon numarasındaki müşteriye mesaj gönderir.\n\nÖrnek:\n/send 05551234567 Merhaba, borç hatırlatması\n\n🔹 /start\nBotu başlatır ve hoş geldiniz mesajı gösterir.`;
+        const helpMsg = `📖 Yardım\n\n🔹 /send [telefon] [mesaj]\nBelirtilen telefon numarasındaki müşteriye mesaj gönderir.\n\nÖrnek:\n/send 05551234567 Merhaba, borç hatırlatması\n\n🔹 /register_owner [kod]\nİşletme sahibi olarak kaydolun ve otomatik bildirimler alın.\n\nÖrnek:\n/register_owner 123456\n\n🔹 /start\nBotu başlatır ve hoş geldiniz mesajı gösterir.`;
         await sendTelegramMessage(chatId, helpMsg);
         await logMessage(chatId, helpMsg, 'outgoing');
         
