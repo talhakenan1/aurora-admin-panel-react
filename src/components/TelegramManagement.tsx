@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Users, Settings, Send, Copy, Check } from 'lucide-react'
+import { MessageCircle, Users, Settings, Send, Copy, Check, Link2, Info, Trash2, Bot } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -49,6 +49,8 @@ const TelegramManagement: React.FC = () => {
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
   const [isBroadcastDialogOpen, setIsBroadcastDialogOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [webhookInfo, setWebhookInfo] = useState<any>(null)
+  const [webhookLoading, setWebhookLoading] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
 
@@ -292,6 +294,32 @@ const TelegramManagement: React.FC = () => {
     })
   }
 
+  const handleWebhookAction = async (action: string) => {
+    try {
+      setWebhookLoading(true)
+      const { data, error } = await supabase.functions.invoke('telegram-bot-setup', {
+        body: { action }
+      })
+
+      if (error) throw error
+
+      setWebhookInfo(data)
+      toast({
+        title: 'Başarılı',
+        description: data.message || 'İşlem tamamlandı.'
+      })
+    } catch (error: any) {
+      console.error('Webhook action error:', error)
+      toast({
+        title: 'Hata',
+        description: error.message || 'İşlem sırasında bir hata oluştu.',
+        variant: 'destructive'
+      })
+    } finally {
+      setWebhookLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -489,6 +517,90 @@ const TelegramManagement: React.FC = () => {
             </div>
         </CardContent>
       </Card>
+
+        {/* Webhook Management Card */}
+        <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-card to-card/80">
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Link2 className="h-6 w-6 text-primary" />
+              </div>
+              Webhook Yönetimi
+            </CardTitle>
+            <CardDescription>
+              Telegram bot'u ile web siteniz arasındaki bağlantıyı kurun ve yönetin
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-800 font-medium mb-2">
+                  ⚠️ Önemli: Bot'un çalışması için webhook kurulumu gereklidir
+                </p>
+                <p className="text-sm text-yellow-700">
+                  Webhook, Telegram'dan gelen mesajları bu uygulamaya iletir. İlk kullanımda "Webhook Kur" butonuna tıklayın.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Button
+                  onClick={() => handleWebhookAction('set_webhook')}
+                  disabled={webhookLoading}
+                  className="flex items-center gap-2"
+                >
+                  <Link2 className="h-4 w-4" />
+                  {webhookLoading ? 'İşleniyor...' : 'Webhook Kur'}
+                </Button>
+
+                <Button
+                  onClick={() => handleWebhookAction('get_webhook_info')}
+                  disabled={webhookLoading}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Info className="h-4 w-4" />
+                  Webhook Bilgisi
+                </Button>
+
+                <Button
+                  onClick={() => handleWebhookAction('get_bot_info')}
+                  disabled={webhookLoading}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Bot className="h-4 w-4" />
+                  Bot Bilgisi
+                </Button>
+
+                <Button
+                  onClick={() => handleWebhookAction('delete_webhook')}
+                  disabled={webhookLoading}
+                  variant="outline"
+                  className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Webhook Sil
+                </Button>
+              </div>
+
+              {webhookInfo && (
+                <div className="mt-4 p-4 bg-muted/30 rounded-lg border">
+                  <h4 className="font-semibold mb-2 text-sm">Son İşlem Sonucu:</h4>
+                  <pre className="text-xs overflow-auto p-3 bg-background rounded border">
+                    {JSON.stringify(webhookInfo, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <h4 className="font-medium text-blue-900 mb-2">Webhook URL:</h4>
+                <code className="text-xs bg-blue-100 px-2 py-1 rounded block overflow-x-auto">
+                  https://cywngfflmpdpuqaigsjc.supabase.co/functions/v1/telegram-webhook
+                </code>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-3">
