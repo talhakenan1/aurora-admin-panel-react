@@ -247,7 +247,23 @@ const DebtManagement: React.FC = () => {
       
       if (error) {
         console.error('Supabase function error:', error)
-        throw new Error(error.message || 'Telegram mesajı gönderilirken hata oluştu')
+        toast({
+          title: 'Telegram Hatası',
+          description: error.message || 'Telegram mesajı gönderilirken hata oluştu.',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      // Check if function returned success = false
+      if (data && !data.success) {
+        console.error('Function returned error:', data)
+        toast({
+          title: 'Telegram Hatası',
+          description: data.message || 'Müşterinin aktif Telegram kaydı bulunamadı. Müşteri önce Telegram botuna kaydolmalı.',
+          variant: 'destructive'
+        })
+        return
       }
 
       toast({

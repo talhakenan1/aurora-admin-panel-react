@@ -241,7 +241,7 @@ serve(async (req) => {
 
       // Handle /start command
       if (text === '/start') {
-        const welcomeMsg = `🤖 Merhaba ${firstName}!\n\nBu bot ile müşterilerinize bildirim gönderebilirsiniz.\n\n📝 Komutlar:\n/send [telefon] [mesaj] - Müşteriye mesaj gönder\n/register_owner [kod] - İşletme sahibi olarak kaydol\n/help - Yardım`;
+        const welcomeMsg = `🤖 Merhaba ${firstName}!\n\nBu bot ile borç hatırlatmaları alabilirsiniz.\n\n📝 İlk Kurulum:\n1️⃣ Web sitesine giriş yapın\n2️⃣ Ayarlar sayfasını açın\n3️⃣ 6 haneli doğrulama kodunu kopyalayın\n4️⃣ Buraya şu komutu yazın:\n/register_owner [kodunuz]\n\nÖrnek: /register_owner 123456\n\n💡 Yardım için: /help`;
         await sendTelegramMessage(chatId, welcomeMsg);
         await logMessage(chatId, welcomeMsg, 'outgoing');
         
@@ -264,9 +264,20 @@ serve(async (req) => {
         });
       }
 
+      // Handle /register command (redirect to /register_owner)
+      if (text === '/register') {
+        const registerMsg = '❌ Yanlış komut!\n\n✅ Doğru kullanım:\n/register_owner [doğrulama_kodu]\n\nÖrnek:\n/register_owner 123456\n\n💡 Doğrulama kodunuzu web sitesinin Ayarlar sayfasından alabilirsiniz.';
+        await sendTelegramMessage(chatId, registerMsg);
+        await logMessage(chatId, registerMsg, 'outgoing');
+        
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       // Handle /help command
       if (text === '/help') {
-        const helpMsg = `📖 Yardım\n\n🔹 /send [telefon] [mesaj]\nBelirtilen telefon numarasındaki müşteriye mesaj gönderir.\n\nÖrnek:\n/send 05551234567 Merhaba, borç hatırlatması\n\n🔹 /register_owner [kod]\nİşletme sahibi olarak kaydolun ve otomatik bildirimler alın.\n\nÖrnek:\n/register_owner 123456\n\n🔹 /start\nBotu başlatır ve hoş geldiniz mesajı gösterir.`;
+        const helpMsg = `📖 Yardım\n\n🔹 /start\nBotu başlatır ve hoş geldiniz mesajı gösterir.\n\n🔹 /register_owner [kod]\nİşletme sahibi olarak kaydolun ve otomatik bildirimler alın.\n\nÖrnek:\n/register_owner 123456\n\n💡 Kodu web sitesinin Ayarlar sayfasından alın.\n\n🔹 /send [telefon] [mesaj]\nMüşteriye mesaj gönderir (sadece kayıtlı işletme sahipleri).\n\nÖrnek:\n/send 05551234567 Ödeme hatırlatması`;
         await sendTelegramMessage(chatId, helpMsg);
         await logMessage(chatId, helpMsg, 'outgoing');
         
@@ -276,7 +287,7 @@ serve(async (req) => {
       }
 
       // Default response for unknown commands
-      const defaultMsg = `❓ Bilinmeyen komut: "${text}"\n\nKomutlar:\n/send [telefon] [mesaj] - Müşteriye mesaj gönder\n/help - Yardım`;
+      const defaultMsg = `❓ Bilinmeyen komut: "${text}"\n\n📝 Kullanılabilir komutlar:\n/start - Başlat\n/register_owner [kod] - Kaydol\n/help - Yardım\n\n💡 Daha fazla bilgi için /help yazın.`;
       await sendTelegramMessage(chatId, defaultMsg);
       await logMessage(chatId, defaultMsg, 'outgoing');
     }
