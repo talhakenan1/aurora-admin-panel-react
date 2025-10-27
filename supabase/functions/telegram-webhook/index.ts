@@ -13,9 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = 'https://cywngfflmpdpuqaigsjc.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5d25nZmZsbXBkcHVxYWlnc2pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMjUyMTQsImV4cCI6MjA2NDcwMTIxNH0.-fFn7DEY-XDxf3LwNkSFJJuMTT1Mrd4Qbs7Hims-w_g';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://cywngfflmpdpuqaigsjc.supabase.co';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseServiceKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
+    }
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     const telegramBotToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
     if (!telegramBotToken) {
