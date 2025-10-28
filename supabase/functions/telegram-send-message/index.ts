@@ -31,9 +31,9 @@ serve(async (req: Request) => {
       return new Response('Phone number and debt ID are required', { status: 400, headers: corsHeaders })
     }
 
-    console.log('Sending reminder to phone:', phone_number, 'for debt:', debt_id)
+    console.log('Sending reminder for debt:', debt_id)
 
-    // Get debt details
+    // Get debt details with user_id (business owner)
     const { data: debt, error: debtError } = await supabaseClient
       .from('debts')
       .select(`
@@ -41,6 +41,7 @@ serve(async (req: Request) => {
         amount,
         due_date,
         description,
+        user_id,
         customers!inner(
           id,
           name,
@@ -56,36 +57,26 @@ serve(async (req: Request) => {
       return new Response('Debt not found', { status: 404, headers: corsHeaders })
     }
 
-    // Find customer by phone using the RPC function
-    const { data: customerData, error: customerError } = await supabaseClient
-      .rpc('find_customer_by_phone', { phone_number })
-
-    if (customerError || !customerData || customerData.length === 0) {
-      console.error('Customer not found for phone:', phone_number)
-      return new Response('Customer not found for this phone number', { status: 404, headers: corsHeaders })
-    }
-
-    const customerId = customerData[0].customer_id
-
-    // Find telegram user for this customer
+    // Find business owner's telegram account
     const { data: telegramUser, error: telegramError } = await supabaseClient
       .from('telegram_users')
       .select('telegram_chat_id, is_active')
-      .eq('customer_id', customerId)
+      .eq('user_id', debt.user_id)
+      .eq('user_type', 'business_owner')
       .eq('is_active', true)
       .single()
 
     if (telegramError || !telegramUser) {
-      console.error('Telegram user not found for customer:', customerId)
-      return new Response('Customer does not have an active Telegram account', { status: 404, headers: corsHeaders })
+      console.error('Business owner telegram not found for user:', debt.user_id)
+      return new Response('Business owner does not have an active Telegram account', { status: 404, headers: corsHeaders })
     }
 
-    // Prepare message content
+    // Prepare message content for business owner
     const dueDate = new Date(debt.due_date)
     const today = new Date()
-    const isToday = debt.due_date === today.toISOString().split('T')[0]
-    const dayText = isToday ? 'BUGÜN' : 'yakında'
-    const urgencyEmoji = isToday ? '🚨' : '⏰'
+    const daysDiff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
+    const isOverdue = daysDiff > 0
+    const urgencyEmoji = isOverdue ? '🚨' : '⏰'
 
     // Format amount with Turkish Lira
     const formattedAmount = new Intl.NumberFormat('tr-TR', {
@@ -101,16 +92,17 @@ serve(async (req: Request) => {
     })
 
     const messageContent = 
-      `${urgencyEmoji} **BORÇ HATIRLATMASI** ${urgencyEmoji}\n\n` +
-      `Sayın **${debt.customers.name}**,\n\n` +
+      `${urgencyEmoji} **GECİKMİŞ BORÇ HATIRLATMASI** ${urgencyEmoji}\n\n` +
+      `👤 **Müşteri:** ${debt.customers.name}\n` +
+      `📱 **Telefon:** ${debt.customers.phone || 'Belirtilmemiş'}\n` +
+      `📧 **Email:** ${debt.customers.email}\n\n` +
       `💰 **Tutar:** ${formattedAmount}\n` +
-      `📅 **Vade Tarihi:** ${formattedDate} (${dayText})\n` +
-      `📝 **Açıklama:** ${debt.description ?? 'Belirtilmemiş'}\n\n` +
-      `${isToday ? '⚠️ Ödeme vadesi bugün dolmaktadır!' : '📢 Ödeme vadesi yaklaşmaktadır.'}\n\n` +
-      `Lütfen en kısa sürede ödemenizi gerçekleştirin.\n\n` +
-      `Teşekkürler! 🙏`
+      `📅 **Vade Tarihi:** ${formattedDate}\n` +
+      `⏱️ **Gecikme:** ${daysDiff} gün\n` +
+      `📝 **Açıklama:** ${debt.description || 'Belirtilmemiş'}\n\n` +
+      `⚠️ Bu borç için müşterinizle iletişime geçmeniz önerilir.`
 
-    // Send Telegram message
+    // Send Telegram message to business owner
     const telegramSent = await sendTelegramMessage(telegramUser.telegram_chat_id, messageContent, botToken)
 
     // Log reminder
@@ -118,7 +110,7 @@ serve(async (req: Request) => {
       .from('reminders')
       .insert({
         debt_id: debt.id,
-        user_id: debt.customers.id, // This should be the business user_id, but we'll use customer for now
+        user_id: debt.user_id,
         reminder_type: 'telegram',
         scheduled_date: new Date().toISOString(),
         sent_at: telegramSent ? new Date().toISOString() : null,
