@@ -671,8 +671,12 @@ const TelegramManagement: React.FC = () => {
                     <tr key={user.id} className="border-b hover:bg-muted/30 transition-colors">
                       <td className="p-4">
                         <div>
-                          <div className="font-semibold text-foreground">{user.customers.name}</div>
-                          <div className="text-sm text-muted-foreground">{user.customers.email}</div>
+                          <div className="font-semibold text-foreground">
+                            {user.customers ? user.customers.name : 'İşletme Sahibi'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {user.customers ? user.customers.email : user.telegram_username || 'Email yok'}
+                          </div>
                         </div>
                       </td>
                       <td className="p-4">
