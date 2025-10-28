@@ -19,7 +19,10 @@ serve(async (req: Request) => {
     
     if (!supabaseUrl || !supabaseKey || !botToken) {
       console.error('Missing required environment variables')
-      return new Response('Server configuration error', { status: 500, headers: corsHeaders })
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
     
     const supabaseClient = createClient(supabaseUrl, supabaseKey)
@@ -28,10 +31,13 @@ serve(async (req: Request) => {
     const { phone_number, debt_id } = await req.json()
 
     if (!phone_number || !debt_id) {
-      return new Response('Phone number and debt ID are required', { status: 400, headers: corsHeaders })
+      return new Response(JSON.stringify({ error: 'Phone number and debt ID are required' }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
-    console.log('Sending reminder for debt:', debt_id)
+    console.log('Processing reminder for debt:', debt_id)
 
     // Get debt details with user_id (business owner)
     const { data: debt, error: debtError } = await supabaseClient
@@ -54,7 +60,10 @@ serve(async (req: Request) => {
 
     if (debtError || !debt) {
       console.error('Error fetching debt:', debtError)
-      return new Response('Debt not found', { status: 404, headers: corsHeaders })
+      return new Response(JSON.stringify({ error: 'Debt not found' }), { 
+        status: 404, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
     // Find business owner's telegram account
@@ -68,7 +77,13 @@ serve(async (req: Request) => {
 
     if (telegramError || !telegramUser) {
       console.error('Business owner telegram not found for user:', debt.user_id)
-      return new Response('Business owner does not have an active Telegram account', { status: 404, headers: corsHeaders })
+      return new Response(JSON.stringify({ 
+        error: 'Business owner does not have an active Telegram account',
+        details: 'Lütfen önce Telegram botuna kaydolun'
+      }), { 
+        status: 404, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
     // Prepare message content for business owner
@@ -82,7 +97,7 @@ serve(async (req: Request) => {
     const formattedAmount = new Intl.NumberFormat('tr-TR', {
       style: 'currency',
       currency: 'TRY'
-    }).format(debt.amount)
+    }).format(Number(debt.amount))
 
     // Format date
     const formattedDate = dueDate.toLocaleDateString('tr-TR', {
@@ -92,14 +107,14 @@ serve(async (req: Request) => {
     })
 
     const messageContent = 
-      `${urgencyEmoji} **GECİKMİŞ BORÇ HATIRLATMASI** ${urgencyEmoji}\n\n` +
-      `👤 **Müşteri:** ${debt.customers.name}\n` +
-      `📱 **Telefon:** ${debt.customers.phone || 'Belirtilmemiş'}\n` +
-      `📧 **Email:** ${debt.customers.email}\n\n` +
-      `💰 **Tutar:** ${formattedAmount}\n` +
-      `📅 **Vade Tarihi:** ${formattedDate}\n` +
-      `⏱️ **Gecikme:** ${daysDiff} gün\n` +
-      `📝 **Açıklama:** ${debt.description || 'Belirtilmemiş'}\n\n` +
+      `${urgencyEmoji} *GECİKMİŞ BORÇ HATIRLATMASI* ${urgencyEmoji}\n\n` +
+      `👤 *Müşteri:* ${debt.customers.name}\n` +
+      `📱 *Telefon:* ${debt.customers.phone || 'Belirtilmemiş'}\n` +
+      `📧 *Email:* ${debt.customers.email}\n\n` +
+      `💰 *Tutar:* ${formattedAmount}\n` +
+      `📅 *Vade Tarihi:* ${formattedDate}\n` +
+      `⏱️ *Gecikme:* ${daysDiff} gün\n` +
+      `📝 *Açıklama:* ${debt.description || 'Belirtilmemiş'}\n\n` +
       `⚠️ Bu borç için müşterinizle iletişime geçmeniz önerilir.`
 
     // Send Telegram message to business owner
@@ -120,13 +135,13 @@ serve(async (req: Request) => {
       })
 
     if (telegramSent) {
-      console.log('Telegram reminder sent successfully')
-      return new Response(JSON.stringify({ success: true, message: 'Reminder sent successfully' }), {
+      console.log('Telegram reminder sent successfully to business owner')
+      return new Response(JSON.stringify({ success: true, message: 'Reminder sent to business owner successfully' }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     } else {
-      return new Response(JSON.stringify({ success: false, message: 'Failed to send telegram message' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Failed to send telegram message' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
@@ -134,7 +149,10 @@ serve(async (req: Request) => {
 
   } catch (error) {
     console.error('Error in telegram-send-message function:', error)
-    return new Response('Internal Server Error', { status: 500, headers: corsHeaders })
+    return new Response(JSON.stringify({ error: 'Internal Server Error', details: error.message }), { 
+      status: 500, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
   }
 })
 
