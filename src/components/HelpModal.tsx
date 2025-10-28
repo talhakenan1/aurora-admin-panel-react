@@ -13,94 +13,94 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-background dark:bg-[#4f5450]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-foreground dark:text-white">Help & Documentation</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-foreground dark:text-white">Yardım ve Dokümantasyon</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="getting-started" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700">
-            <TabsTrigger value="getting-started" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Getting Started</TabsTrigger>
-            <TabsTrigger value="prescriptions" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Prescriptions</TabsTrigger>
-            <TabsTrigger value="customers" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Customers</TabsTrigger>
-            <TabsTrigger value="orders" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Orders</TabsTrigger>
+            <TabsTrigger value="getting-started" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Başlangıç</TabsTrigger>
+            <TabsTrigger value="prescriptions" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Reçeteler</TabsTrigger>
+            <TabsTrigger value="customers" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Müşteriler</TabsTrigger>
+            <TabsTrigger value="orders" className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white">Siparişler</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="getting-started" className="space-y-4 mt-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Welcome to Melis Optik</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Melis Optik'e Hoş Geldiniz</h3>
               <div className="space-y-4 text-gray-700 dark:text-gray-300">
                 <p>
-                  This application helps you manage your optical business efficiently. Here's what you can do:
+                  Bu uygulama, optik işletmenizi verimli bir şekilde yönetmenize yardımcı olur. Yapabilecekleriniz:
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Manage customer information and prescriptions</li>
-                  <li>Create and track orders</li>
-                  <li>View business analytics on the dashboard</li>
-                  <li>Customize your experience through settings</li>
+                  <li>Müşteri bilgilerini ve reçetelerini yönetme</li>
+                  <li>Sipariş oluşturma ve takip etme</li>
+                  <li>Dashboard'da iş analitiği görüntüleme</li>
+                  <li>Ayarlar üzerinden deneyiminizi özelleştirme</li>
                 </ul>
               </div>
             </div>
-            
+
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Quick Start Guide</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Hızlı Başlangıç Rehberi</h3>
               <div className="space-y-4 text-gray-700 dark:text-gray-300">
                 <div>
-                  <h4 className="font-medium text-foreground dark:text-white">1. Add Your First Customer</h4>
-                  <p>Navigate to the Customers page and click "Add Customer" to get started.</p>
+                  <h4 className="font-medium text-foreground dark:text-white">1. İlk Müşterinizi Ekleyin</h4>
+                  <p>Müşteriler sayfasına gidin ve başlamak için "Müşteri Ekle" butonuna tıklayın.</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-foreground dark:text-white">2. Create a Prescription</h4>
-                  <p>Use the "New Prescription" button to create prescriptions for your customers.</p>
+                  <h4 className="font-medium text-foreground dark:text-white">2. Reçete Oluşturun</h4>
+                  <p>Müşterileriniz için reçete oluşturmak üzere "Yeni Reçete" butonunu kullanın.</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-foreground dark:text-white">3. Track Orders</h4>
-                  <p>Monitor all orders and their status from the Orders page.</p>
+                  <h4 className="font-medium text-foreground dark:text-white">3. Siparişleri Takip Edin</h4>
+                  <p>Siparişler sayfasından tüm siparişleri ve durumlarını izleyin.</p>
                 </div>
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="prescriptions" className="space-y-4 mt-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Creating Prescriptions</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Reçete Oluşturma</h3>
               <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                <p>To create a new prescription:</p>
+                <p>Yeni bir reçete oluşturmak için:</p>
                 <ol className="list-decimal pl-6 space-y-2">
-                  <li>Click the "New Prescription" button</li>
-                  <li>Select or create a customer</li>
-                  <li>Fill in the prescription details including lens measurements</li>
-                  <li>Add any special notes or requirements</li>
-                  <li>Set the price and save</li>
+                  <li>"Yeni Reçete" butonuna tıklayın</li>
+                  <li>Bir müşteri seçin veya yeni müşteri oluşturun</li>
+                  <li>Lens ölçümleri dahil reçete detaylarını doldurun</li>
+                  <li>Özel notlar veya gereksinimler ekleyin</li>
+                  <li>Fiyatı belirleyin ve kaydedin</li>
                 </ol>
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="customers" className="space-y-4 mt-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Managing Customers</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Müşteri Yönetimi</h3>
               <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                <p>Customer management features include:</p>
+                <p>Müşteri yönetimi özellikleri:</p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Adding new customers with contact information</li>
-                  <li>Viewing customer order history</li>
-                  <li>Searching customers by name, email, or ID</li>
-                  <li>Tracking prescription history for each customer</li>
+                  <li>İletişim bilgileriyle yeni müşteri ekleme</li>
+                  <li>Müşteri sipariş geçmişini görüntüleme</li>
+                  <li>Müşterileri isim, e-posta veya ID ile arama</li>
+                  <li>Her müşteri için reçete geçmişini takip etme</li>
                 </ul>
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="orders" className="space-y-4 mt-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Order Management</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">Sipariş Yönetimi</h3>
               <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                <p>Order tracking includes:</p>
+                <p>Sipariş takibi şunları içerir:</p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li><strong>New:</strong> Orders placed within the last 7 days</li>
-                  <li><strong>Shipped:</strong> Orders older than 7 days</li>
-                  <li><strong>Returned:</strong> Orders marked as returned</li>
+                  <li><strong>Yeni:</strong> Son 7 gün içinde verilen siparişler</li>
+                  <li><strong>Gönderildi:</strong> 7 günden eski siparişler</li>
+                  <li><strong>İade:</strong> İade olarak işaretlenen siparişler</li>
                 </ul>
-                <p>You can filter orders by status and search by customer name or order ID.</p>
+                <p>Siparişleri duruma göre filtreleyebilir ve müşteri adı veya sipariş ID'sine göre arama yapabilirsiniz.</p>
               </div>
             </div>
           </TabsContent>
@@ -108,7 +108,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
 
         <div className="flex justify-end pt-4 border-t dark:border-gray-600">
           <Button onClick={onClose} className="bg-blue-500 hover:bg-blue-600 text-white">
-            Close
+            Kapat
           </Button>
         </div>
       </DialogContent>
